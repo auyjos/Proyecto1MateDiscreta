@@ -1,5 +1,3 @@
-# conjunto.py
-
 class Conjuntos:
     def __init__(self, elementos):
         self.elementos = set(elementos)  # Usamos set para evitar duplicados
@@ -20,4 +18,4 @@ class Conjuntos:
         return Conjuntos(self.elementos ^ otro_conjunto.elementos)
 
     def __str__(self):
-        return f"{sorted(self.elementos)}"
+        return f"{{{', '.join(sorted(self.elementos))}}}"
