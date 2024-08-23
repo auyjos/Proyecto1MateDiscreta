@@ -3,7 +3,8 @@ from conjuntos import Conjuntos
 
 def leer_conjunto():
     while True:
-        elementos = input("Ingrese los elementos del conjunto (letras A-Z y dígitos 0-9, sin espacios): ")
+        elementos = input(
+            "Ingrese los elementos del conjunto (letras A-Z y dígitos 0-9, sin espacios): ")
         if all(char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" for char in elementos.upper()):
             return Conjuntos(elementos.upper())
         else:
@@ -18,12 +19,13 @@ def mostrar_menu():
 
 
 def seleccionar_conjuntos(conjuntos):
-    indices = input(f"Seleccione los conjuntos que desea operar (ejemplo: 0 1 para los primeros dos conjuntos): ")
+    indices = input(
+        f"Seleccione los conjuntos que desea operar (ejemplo: A,B,C): ").upper().replace(" ", "")
     seleccionados = []
-    for idx in indices.split():
-        try:
-            seleccionados.append((int(idx), conjuntos[int(idx)]))
-        except (ValueError, IndexError):
+    for idx in indices.split(','):
+        if idx in conjuntos:
+            seleccionados.append((idx, conjuntos[idx]))
+        else:
             print(f"Índice inválido: {idx}. Se omite.")
     return seleccionados
 
@@ -42,44 +44,61 @@ def operar_conjuntos(conjuntos, universo):
     print("5. Diferencia Simétrica")
     opcion = input("Seleccione una operación: ")
 
-    idx_A, A = seleccionados[0]
-    idx_B, B = seleccionados[1]
-
     if opcion == "1":
-        print(f"Complemento del conjunto {idx_A}: {A.complemento(universo)}")
-        print(f"Complemento del conjunto {idx_B}: {B.complemento(universo)}")
+        for idx, conjunto in seleccionados:
+            print(f"Complemento del conjunto {idx}: {
+                  conjunto.complemento(universo)}")
     elif opcion == "2":
-        print(f"Unión del conjunto {idx_A} y el conjunto {idx_B}: {A.union(B)}")
+        resultado = seleccionados[0][1]
+        for _, conjunto in seleccionados[1:]:
+            resultado = resultado.union(conjunto)
+        print(f"Unión de los conjuntos: {resultado}")
     elif opcion == "3":
-        print(f"Intersección del conjunto {idx_A} y el conjunto {idx_B}: {A.interseccion(B)}")
+        resultado = seleccionados[0][1]
+        for _, conjunto in seleccionados[1:]:
+            resultado = resultado.interseccion(conjunto)
+        print(f"Intersección de los conjuntos: {resultado}")
     elif opcion == "4":
-        print(f"Diferencia {idx_A} - {idx_B}: {A.diferencia(B)}")
-        print(f"Diferencia {idx_B} - {idx_A}: {B.diferencia(A)}")
+        resultado = seleccionados[0][1]
+        for _, conjunto in seleccionados[1:]:
+            resultado = resultado.diferencia(conjunto)
+        print(f"Diferencia de los conjuntos: {resultado}")
     elif opcion == "5":
-        print(f"Diferencia Simétrica entre el conjunto {idx_A} y el conjunto {idx_B}: {A.diferencia_simetrica(B)}")
+        resultado = seleccionados[0][1]
+        for _, conjunto in seleccionados[1:]:
+            resultado = resultado.diferencia_simetrica(conjunto)
+        print(f"Diferencia Simétrica de los conjuntos: {resultado}")
     else:
         print("Opción no válida.")
 
 
 def main():
     universo = Conjuntos("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-    conjuntos = []
+    conjuntos = {}
+    letras_disponibles = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
     while True:
         mostrar_menu()
         opcion = input("Seleccione una opción: ")
 
         if opcion == "1":
-            if conjuntos:
-                print("Advertencia: Se borrarán todos los conjuntos anteriores.")
-                conjuntos.clear()
+            if not letras_disponibles:
+                print(
+                    "No se pueden crear más conjuntos, se ha alcanzado el límite de 26.")
+                continue
 
             num_conjuntos = int(input("¿Cuántos conjuntos desea crear? "))
+            if num_conjuntos > len(letras_disponibles):
+                print(f"Solo puede crear hasta {
+                      len(letras_disponibles)} conjuntos adicionales.")
+                continue
+
             for i in range(num_conjuntos):
-                print(f"\nConstruir Conjunto {i}")
+                letra = letras_disponibles.pop(0)
+                print(f"\nConstruir Conjunto {letra}")
                 conjunto = leer_conjunto()
-                conjuntos.append(conjunto)
-                print(f"Conjunto {i}: {conjunto}")
+                conjuntos[letra] = conjunto
+                print(f"Conjunto {letra}: {conjunto}")
         elif opcion == "2":
             if len(conjuntos) < 2:
                 print("Debe haber al menos dos conjuntos para operar.")
